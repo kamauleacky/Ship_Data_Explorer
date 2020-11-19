@@ -1,6 +1,7 @@
 
 library(shiny)
 library(shiny.semantic)
+library(leaflet)
 
 shinyUI(semanticPage(
 
@@ -30,12 +31,17 @@ shinyUI(semanticPage(
         
       ),
       
-      fluidRow(
-              plotOutput("distPlot")
+      split_layout(
+        leafletOutput('shiproute')
 
       ),
-      split_layout(
-        textOutput('footnote')
+      split_layout(        
+        textOutput('footnote1'),
+        
+        textOutput('footnote2'),
+        
+        textOutput('footnote3')
+        
       )
     )
   )
