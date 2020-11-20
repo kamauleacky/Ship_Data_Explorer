@@ -2,6 +2,7 @@
 library(shiny)
 library(shiny.semantic)
 library(leaflet)
+library(semantic.dashboard)
 
 shinyUI(semanticPage(
 
@@ -19,23 +20,25 @@ shinyUI(semanticPage(
 
     # Show a plot of the generated distribution
     main_panel(
-              h1('Stats'),
-
+ fluidRow(
       split_layout(
-        dropdown_input("simple_dropdown", LETTERS[1:5], value = "A", type = "selection multiple"),
-    
-        dropdown_input("simple_dropdown2", LETTERS[1:5], value = "A", type = "selection multiple"),
-        dropdown_input("simple_dropdown", LETTERS[1:5], value = "A", type = "selection multiple"),
-        dropdown_input("simple_dropdown", LETTERS[1:5], value = "A", type = "selection multiple")
-      
+        infoBoxOutput('header1'),
         
-      ),
+        infoBoxOutput('header2'),
+        infoBoxOutput('header3'),
+        infoBoxOutput('header4')
+        
+      )
+)
+      ,
       
-      split_layout(
+      fluidRow(
         leafletOutput('shiproute')
 
       ),
-      split_layout(        
+      
+fluidRow(
+        split_layout(        
         textOutput('footnote1'),
         
         textOutput('footnote2'),
@@ -43,6 +46,7 @@ shinyUI(semanticPage(
         textOutput('footnote3')
         
       )
+)
     )
   )
 ))
