@@ -1,8 +1,8 @@
-
-library(shiny)
-library(shiny.semantic)
-library(leaflet)
-library(semantic.dashboard)
+# 
+# library(shiny)
+# library(shiny.semantic)
+# library(leaflet)
+# library(semantic.dashboard)
 
 shinyUI(semanticPage(
 
@@ -15,7 +15,16 @@ shinyUI(semanticPage(
                   "Number of bins:",
                   min = 1,
                   max = 50,
-                  value = 30)
+                  value = 30),
+      
+      ShipDropdown("shiptype", label = "Select vessel type"),
+      
+      ShipDropdown("shipname", label = "Select vessel name"),
+      
+      dataTableOutput('shipstats')
+      
+      
+      
     ),
 
     # Show a plot of the generated distribution

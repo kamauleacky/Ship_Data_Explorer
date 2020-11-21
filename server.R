@@ -1,17 +1,45 @@
-#List of packages to load
- 
-PkgList <- list('shiny', 'vroom', 'tidyverse', 'leaflet')
-lapply(PkgList, function(x)do.call('require', list(x)))
-
 #Load ship data once across sessions
 shipdata <- vroom('Data/ships.csv')
 names(shipdata) <- tolower(names(shipdata))
 sort(names(shipdata))
-names(shipdata)[25] <- 'portfr'
+names(shipdata)[25] <- 'portfr'#Fix duplicate names
 
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
 
+#Update Side bar area
+#Vessel type
+  shipdrop_choice <- shipdata %>% distinct(shiptype) %>%
+    arrange(shiptype) %>% pull()
+    
+ shiptypeselect <-  ShipDropdownServer("shiptype", choiceselect = shipdrop_choice)
+   
+  #Vessel Name
+  shipdrop_name <- reactive({
+  req(shiptypeselect())
+  validate(
+    need(is.numeric(as.numeric(gsub('[^0-9]','', shiptypeselect()))),
+         'Please select a vessel type')
+  )
+
+    shipdata %>% dplyr::filter(shiptype==as.numeric(shiptypeselect())) %>%
+      distinct(shipname) %>% arrange(shipname) %>% pull() %>% 
+      as.character()
+
+  })
+
+  observeEvent(shipdrop_name(),{
+  
+ shipnameselect <-  ShipDropdownServer("shipname", choiceselect = shipdrop_name())
+  })
+  
+  
+    output$shipstats <- renderDataTable({
+      # shiptypeselect()
+      # length(shipdrop_name())
+      data.frame(a=3, b=4)
+      })
+  
   # update header section
   
   output$header1 <- renderInfoBox({
