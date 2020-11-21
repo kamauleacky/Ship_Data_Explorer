@@ -16,9 +16,11 @@ shinyUI(semanticPage(
       
       ShipDropdown("shipname", label = "Select vessel name"),
       
-      dataTableOutput('shipstats'),
-      textOutput('shiptext')
-      
+      # dataTableOutput('shipstats'),
+      useShinyjs(),
+      (
+      action_button('shipreport', 'Generate statistics for selected vessel')
+      )
       
       
     ),
@@ -27,12 +29,10 @@ shinyUI(semanticPage(
     main_panel(
  fluidRow(
       split_layout(
-        infoBoxOutput('header1'),
-        
-        infoBoxOutput('header2'),
-        infoBoxOutput('header3'),
-        infoBoxOutput('header4')
-        
+        uiOutput('header1'),
+        uiOutput('header2'),
+        uiOutput('header3'),
+        uiOutput('header4')
       )
 )
       ,
@@ -44,11 +44,11 @@ shinyUI(semanticPage(
       
 fluidRow(
         split_layout(        
-        textOutput('footnote1'),
+        htmlOutput('footnote1'),
         
-        textOutput('footnote2'),
+        htmlOutput('footnote2')
         
-        textOutput('footnote3')
+        # textOutput('footnote3')
         
       )
 )

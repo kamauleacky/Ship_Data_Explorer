@@ -1,7 +1,10 @@
 
 # Define functions/objects exposed to both UI and Server
 #List of packages to load
-PkgList <- list('shiny', 'shiny.semantic', 'semantic.dashboard', 'vroom', 'tidyverse', 'leaflet')
+PkgList <- list('shiny', 'shiny.semantic', 'semantic.dashboard', 'shinyjs',
+                'tidyverse', 'leaflet', 'geosphere')
+# 'feather', vroom: called respective functions directly
+
 lapply(PkgList, function(x)do.call('require', list(x)))
 
 

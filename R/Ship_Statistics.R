@@ -1,11 +1,44 @@
 #R helper functions
+InputChecker <- function(var){
+  if(grepl('<select one>|<none available>', tolower(as.character(var)))){
+    return(NULL)
+  }else{
+    return(TRUE)
+  }
+}
+
 #Upon vessel type selection, number of available ships
-VesselShip <- function(selectedvessel, shipdatafile){
+
+
+VesselTypeData <- function(selectedvessel, shipdatafile){
   stopifnot(!is.na(as.numeric(selectedvessel)))
   shipdatafile %>% dplyr::filter(shiptype==selectedvessel)
 }
 
-ShipStatsSelected <- function(selectedship, shipdatafile){
-  
+ShipSelectedData <- function(selectedship, vesseltypedata){
+  shipdata <- vesseltypedata %>% dplyr::filter(shipname==selectedship)
 }
+
+ShipReportData <- function(shipseldata){
+  shipseldata <- shipseldata %>% 
+    dplyr::mutate(latprev=lag(lat), lonprev=lag(lon),
+                  latprev=case_when(is.na(latprev)~lat, TRUE~latprev),
+                  lonprev=case_when(is.na(lonprev)~lon, TRUE~lonprev)) %>% 
+    rowwise() %>% 
+    dplyr::mutate(
+                  distcord=c(distm(x=c(lon, lat), y=c(lonprev, latprev)) )
+  ) %>% data.frame()
   
+  shipmaxdist <- shipseldata %>% dplyr::filter(distcord==max(distcord)) %>% 
+    arrange(desc(datetime)) %>% top_n(datetime, 1)
+  
+  shipreport <- shipmaxdist %>% dplyr::select(-c(lonprev, latprev)) %>% 
+    dplyr::mutate(position='Current') %>% bind_rows(
+      shipmaxdist %>% dplyr::select(-c(lon, lat)) %>%
+        dplyr::rename(lon=lonprev, lat=latprev) %>% 
+        dplyr::mutate(position='Previous')
+    )
+
+  return(shipreport)
+  
+  }  
