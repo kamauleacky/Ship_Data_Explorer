@@ -15,30 +15,37 @@ shinyServer(function(input, output, session) {
  shiptypeselect <-  ShipDropdownServer("shiptype", choiceselect = shipdrop_choice)
    
   #Vessel Name
-  shipdrop_name <- reactive({
+  shipnameselect <- reactive({
   req(shiptypeselect())
   validate(
     need(is.numeric(as.numeric(gsub('[^0-9]','', shiptypeselect()))),
          'Please select a vessel type')
   )
 
-    shipdata %>% dplyr::filter(shiptype==as.numeric(shiptypeselect())) %>%
-      distinct(shipname) %>% arrange(shipname) %>% pull() %>% 
+   choicenames <-  shipdata %>% dplyr::filter(shiptype==as.numeric(shiptypeselect())) %>%
+      distinct(shipname) %>% arrange(shipname) %>% pull() %>%
       as.character()
 
-  })
+ return(
+    ShipDropdownServer("shipname", choiceselect = choicenames)
+ )
+    })
 
-  observeEvent(shipdrop_name(),{
+ 
   
- shipnameselect <-  ShipDropdownServer("shipname", choiceselect = shipdrop_name())
-  })
-  
-  
-    output$shipstats <- renderDataTable({
-      # shiptypeselect()
+output$shipstats <- renderDataTable({
+      # data.frame(shipnameselect()())
       # length(shipdrop_name())
-      data.frame(a=3, b=4)
+      # data.frame(a=3, b=4)
       })
+
+# observeEvent(shipnameselect(),{
+#   
+# output$shiptext <- renderText({
+# # shipnameselect()()
+#   })
+# 
+# })
   
   # update header section
   
@@ -66,19 +73,33 @@ shinyServer(function(input, output, session) {
   
   
   #Update Map area
-  # points <- eventReactive(input$bins , {
+  # shipcords <- eventReactive(input$bins , {
   #   cbind(shipdata[1, c("lon", "lat")] )
   # }, ignoreNULL = FALSE)
+  # 
+  # shipcords <-reactive( shipdata %>% dplyr::distinct(flag, .keep_all=T)#(lon==min(lon)|lat==min(lat))
+  #                    )
+  #Update map with selected ship data
+#Default map shows distinct maritime flags locations... upon user input, update map accordingly
+shipcords <- reactive({
+if(grepl('<select one>|none available', tolower(shipnameselect()()))){
+  shipdata %>% dplyr::distinct(flag, .keep_all=T)
+}else{
+    shipdata %>%
+    dplyr::filter(shiptype==as.numeric(shiptypeselect())&
+                  shipname==shipnameselect()()
+                  ) #%>% distinct(flag, .keep_all = T)
+}
+  })
   
-  points <-reactive( shipdata %>% dplyr::distinct(flag, .keep_all=T)#(lon==min(lon)|lat==min(lat))
-                     )
+  
   
   output$shiproute <- renderLeaflet({
     leaflet() %>%
       addProviderTiles(providers$Stamen.TonerLite,
                        options = providerTileOptions(noWrap = TRUE)
       ) %>%
-      addMarkers(data = points())
+      addMarkers(data = shipcords())
   })
   
   

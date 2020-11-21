@@ -11,17 +11,13 @@ shinyUI(semanticPage(
 
    sidebar_layout(
     sidebar_panel(
-      slider_input("bins",
-                  "Number of bins:",
-                  min = 1,
-                  max = 50,
-                  value = 30),
-      
+   
       ShipDropdown("shiptype", label = "Select vessel type"),
       
       ShipDropdown("shipname", label = "Select vessel name"),
       
-      dataTableOutput('shipstats')
+      dataTableOutput('shipstats'),
+      textOutput('shiptext')
       
       
       
