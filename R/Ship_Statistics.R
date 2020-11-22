@@ -31,16 +31,17 @@ ShipSelectedData <- function(selectedship, vesseltypedata){
 }
 
 ShipReportData <- function(shipseldata){
-  shipseldata <- shipseldata %>% 
+  shipselout <- shipseldata %>% 
     dplyr::mutate(latprev=lag(lat), lonprev=lag(lon),
                   latprev=case_when(is.na(latprev)~lat, TRUE~latprev),
                   lonprev=case_when(is.na(lonprev)~lon, TRUE~lonprev)) %>% 
     rowwise() %>% 
     dplyr::mutate(
-                  distcord=c(distm(x=c(lon, lat), y=c(lonprev, latprev)) )
+                  distcord=c(distm(x=c(lon, lat), y=c(lonprev, latprev), fun=distGeo) ),
+                  distcord=round(distcord, 4)
   ) %>% data.frame()
   
-  shipmaxdist <- shipseldata %>% dplyr::filter(distcord==max(distcord)) %>% 
+  shipmaxdist <- shipselout %>% dplyr::filter(distcord==max(distcord)) %>% 
     arrange(desc(datetime)) %>% top_n(1, datetime)
   
   shipreport <- shipmaxdist %>% dplyr::select(-c(lonprev, latprev)) %>% 

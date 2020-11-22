@@ -34,6 +34,7 @@ ShipDropdownServer <- function(id, choiceselect) {
                            ,selected = '<Select one>'
       )
       
+      # choicelist <-  reactive(input$shipselect)
       choicelist <-  reactive(input$shipselect)
       return(choicelist)
       
