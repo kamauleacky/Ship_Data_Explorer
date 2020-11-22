@@ -16,13 +16,17 @@ shinyUI(semanticPage(
       
       ShipDropdown("shipname", label = "Select vessel name"),
       
+      vertical_layout(
       # dataTableOutput('shipstats'),
       useShinyjs(),
       (
-      action_button('shipreport', 'Generate statistics for selected vessel')
+      action_button('shipreport', 'Show maximum distance location for selection on map')
       )
       
       
+    ,
+    downloadButton('download', 'Download markdown report (to implement)')
+    )
     ),
 
     # Show a plot of the generated distribution

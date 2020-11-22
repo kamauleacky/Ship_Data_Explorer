@@ -7,6 +7,17 @@ InputChecker <- function(var){
   }
 }
 
+#Render map
+
+RenderLeafletMap <-function(latlon){
+    leaflet() %>%
+    addProviderTiles(providers$Stamen.TonerLite,
+                     options = providerTileOptions(noWrap = TRUE)
+    ) %>%
+    addMarkers(data = latlon)
+
+}
+
 #Upon vessel type selection, number of available ships
 
 
@@ -30,7 +41,7 @@ ShipReportData <- function(shipseldata){
   ) %>% data.frame()
   
   shipmaxdist <- shipseldata %>% dplyr::filter(distcord==max(distcord)) %>% 
-    arrange(desc(datetime)) %>% top_n(datetime, 1)
+    arrange(desc(datetime)) %>% top_n(1, datetime)
   
   shipreport <- shipmaxdist %>% dplyr::select(-c(lonprev, latprev)) %>% 
     dplyr::mutate(position='Current') %>% bind_rows(

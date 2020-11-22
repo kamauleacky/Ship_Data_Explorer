@@ -5,12 +5,13 @@ names(shipdata) <- tolower(names(shipdata))
 sort(names(shipdata))
 names(shipdata)[25] <- 'portfr'#Fix duplicate names
 
-write_feather(shipdata, 'Data/ships.feather')
+feather::write_feather(shipdata, 'Data/ships.feather')
 }else{
-  shipdata <- read_feather('Data/ships.feather')
+  shipdata <- feather::read_feather('Data/ships.feather')
 }
 
 shinyServer(function(input, output, session) {
+  
 #status indicator
   status <- reactiveValues(value='map initializing...', gpscord='')
   
@@ -40,9 +41,15 @@ shinyServer(function(input, output, session) {
     })
   
   
-  # observeEvent(input$shipreport,{
-  # 
-  # })
+observeEvent(input$shipreport, {
+output$shiproute <- renderLeaflet({
+      status$value <- "<font color=\"#FF00FF\"><b>consecutive points with largest distance travelled</b></font>"
+ RenderLeafletMap(latlon = vesselshipreport()[[1]])
+        
+     })
+shinyjs::hide(input$ship)
+     
+   })
 
  
   #Display info on selected vessel/ship
@@ -58,20 +65,15 @@ outship <-  ShipSelectedData(selectedship = shipnameselect()(), vesseltypedata =
 outreport <- ShipReportData(shipseldata = outship)
 
 
-status$gpscord <-'sdfd'
-# paste0('For the selected vessel,
-#                         the longest distance travelled between two consecutive coordinates was', 
-#                         unique(outreport$distcord), 'm. This trip occured on',
-#                         unique(outreport$datetime), ' at the current location as shown 
-#                         on the map')
-    return(outreport)
+gpscord <- paste0('For the selected vessel,
+                        the longest distance travelled between two consecutive coordinates was ',
+                        round(unique(outreport$distcord),4), 'm. This trip occured most recently on ',
+                        unique(outreport$datetime), '. To show the location on the map,
+                  please click on the corresponding button.')
+    return(list(report=outreport, reporttext=gpscord)) 
   })
 #   
   
-output$shipstats <- renderDataTable({
-  vesselshipreport()
-      })
- 
   
   # update header section
   
@@ -98,18 +100,13 @@ output$shipstats <- renderDataTable({
   }  )
   
   
-  #Update Map area
-  # shipcords <- eventReactive(input$bins , {
-  #   cbind(shipdata[1, c("lon", "lat")] )
-  # }, ignoreNULL = FALSE)
-  # 
-  # shipcords <-reactive( shipdata %>% dplyr::distinct(flag, .keep_all=T)#(lon==min(lon)|lat==min(lat))
-  #                    )
+  #Update Map area 
   #Update map with selected ship data
 #Default map shows distinct maritime flags locations... upon user input, update map accordingly
-shipcords <- reactive({
+
+  shipcords <- reactive({
   if(!grepl('<select one>|<none available>',tolower(shipnameselect()()))){
-      status$value <- "<font color=\"#FF0000\"><b>distinct locations of selected vessel</b></font>"
+      # status$value <- "<font color=\"#FF0000\"><b>distinct locations of selected vessel</b></font>"
    out <-   shipdata %>%
     dplyr::filter(shiptype==as.numeric(shiptypeselect())&
                   shipname==shipnameselect()()
@@ -124,17 +121,20 @@ shipcords <- reactive({
   return(out)
   
 })
- 
-  
-  
-  output$shiproute <- renderLeaflet({
-    leaflet() %>%
-      addProviderTiles(providers$Stamen.TonerLite,
-                       options = providerTileOptions(noWrap = TRUE)
-      ) %>%
-      addMarkers(data = shipcords())
+ ##Render map
+#- Default render
+output$shiproute <- renderLeaflet({
+    RenderLeafletMap(latlon = shipcords())
   })
   
+# - Updated with selected vessel info
+observeEvent(vesselshipreport(),{
+  status$value <- "<font color=\"#FF0000\"><b>distinct locations of selected vessel</b></font>"
+  
+  output$shiproute <- renderLeaflet({
+    RenderLeafletMap(latlon = shipcords())
+  })
+})
   
   #Update footer section
    
@@ -143,7 +143,7 @@ shipcords <- reactive({
   }  )
   
   output$footnote2 <- renderText({
-status$gpscord
+    vesselshipreport()$reporttext
     }  )
   
   # output$footnote3 <- renderText({
