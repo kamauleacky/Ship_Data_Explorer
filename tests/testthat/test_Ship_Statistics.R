@@ -1,5 +1,5 @@
 library(testthat)
-source('R/Ship_Statistics.R')
+source('../../R/Ship_Statistics.R')
 
 geodist_testdata <- data.frame(lon=c(-8.29258, -8.29315,
                                  -18.34152,-8.29380,
