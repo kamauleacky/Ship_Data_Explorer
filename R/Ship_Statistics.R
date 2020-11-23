@@ -10,7 +10,8 @@ InputChecker <- function(var){
 #Render map
 
 RenderLeafletMap <-function(latlon){
-    leaflet() %>%
+    leaflet(options = leafletOptions(
+      attributionControl=FALSE)) %>%
     addProviderTiles(providers$Stamen.TonerLite,
                      options = providerTileOptions(noWrap = TRUE)
     ) %>%

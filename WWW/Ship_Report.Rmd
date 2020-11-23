@@ -1,0 +1,88 @@
+---
+author: "Leacky Muchene"
+header-includes: 
+- \usepackage{longtable}
+- \usepackage{booktabs}
+- \usepackage{float}
+date: '`r format(Sys.time(),  "%a %d-%b-%Y %X",  tz = "CET")`'
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '5'
+    df_print: kable
+    fig_caption: yes
+    number_sections: true
+documentclass: article
+classoption: 
+  - a4paper
+params:
+  ParametersTable: NA
+  GeoDistTable: NA
+  shiptype: NA
+  shipname: NA
+  filetimestamp: NA
+title: "`r paste0('Ship Data Explorer Report: \n ')`" 
+subtitle: "`r paste0('Vessel type: ',  params$shiptype, ', Vessel name: ', params$shipname)`" 
+always_allow_html: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.height = 8,  fig.width = 8, fig.align='center', fig.pos = 'H', warning = FALSE, message = FALSE )
+PkgList <- list('plyr', 'knitr',  'tidyverse', 'kableExtra') 
+lapply(PkgList, function(x)do.call('require', list(x)))
+```
+
+# Introduction
+
+The application allows a user to select a vessel (name) from a preferred vessel type. For the selection, summary note is provided indicating the ***most recent*** date for which the vessel covered the longest distance between two consecutive locations.
+
+## Key notes
+- Convert input data to feather for faster loading
+- Further improvements can still be done on the app
++ Generate reports in temporary directory to keep sessions clean
++ Timestamp the report file name
++ Intensive testing before deployment to production environment
++ Add tabsets to view report within app
++ Progress bar for time consuming tasks etc
++ Implement dynamic show/hide of buttons
++ Refine report tables content and size
+
+# Selected Vessel Parameters
+
+A summary of the  parameters selected by the user is presented in Table \ref{tab:ParametersTable}.
+
+```{r, ParametersTable, results='markup'}
+ 
+knitr::kable(params$ParametersTable,  
+             caption='Summary of vessel  parameters options.',
+              format='latex',
+             longtable=T, booktabs=T)
+
+
+```
+
+
+
+# Longest distance between consecutive locations
+
+For the selected vessel, data corresponding to the longest distance in meters between consecutive locations is presented in Table \ref{tab:GeoDistTable}.
+
+```{r, GeoDistTable, results='markup'}
+ 
+knitr::kable(params$GeoDistTable,  
+             caption='Summary of vessel  parameters data for longest distance covered.',
+              format='latex',
+             longtable=T, booktabs=T)%>% 
+  kable_styling(font_size=7,   latex_options="scale_down")
+
+
+```
+
+
+
+# R Session Information
+An overview of loaded packages, their versions and other relevant platform information is presented below.
+
+```{r}
+sessionInfo()
+```

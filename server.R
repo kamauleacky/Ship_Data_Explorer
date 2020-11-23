@@ -133,9 +133,11 @@ output$shiproute <- renderLeaflet({
 observeEvent(vesselshipreport(),{
   status$value <- "<font color=\"#FF0000\"><b>distinct locations of selected vessel</b></font>"
   
+  #Update map
   output$shiproute <- renderLeaflet({
     RenderLeafletMap(latlon = shipcords())
   })
+  
 })
 
 #- Update with  two points with largest distance apart   
@@ -145,6 +147,7 @@ observeEvent(input$shipreport, {
     RenderLeafletMap(latlon = vesselshipreport()[[1]])
     
   })
+  
   
 })
   #Update footer section
@@ -157,8 +160,50 @@ observeEvent(input$shipreport, {
     vesselshipreport()$reporttext
     }  )
   
-  # output$footnote3 <- renderText({
-  #   paste('The stats for the selected ship are as follows...') 
-  # }  )
+  
+  observeEvent(input$generatereport, {
+         n <- 3
+ withProgress(message = 'Generating report', value = 0, {
+      
+      incProgress(1/n, message = paste("Gather variables part"))
+      
+    # Generate report
+    filetimestamp <-  gsub('-|\\s','',paste0(strftime(Sys.time(), 
+                                                      format = "%d%b%Y_%H%M%S", 
+                                                      tz = "CET", usetz = T)))
+    
+    ParametersTable=data.frame(Parameter=c('Ship Type', 'Ship Name'),
+                               Value=c(shiptypeselect()(), shipnameselect()()))
+    
+    incProgress(2/n, message = paste("Please wait...Rendering RMarkdown"))
+    
+    render('WWW/Ship_Report.Rmd', output_format = 'all', 
+           # output_file = paste0('Ship_Report_', filetimestamp,'.pdf'),
+           params=list(
+             shiptype=as.numeric(shiptypeselect()()), 
+             shipname=as.character(shipnameselect()()), 
+             filetimestamp=filetimestamp,
+             ParametersTable=ParametersTable,
+             GeoDistTable=vesselshipreport()[[1]])
+    )
+    
+    incProgress(3/n, message = paste("Preparing for download"))
+    
+     enable(input$Download)
+     
+    })
+  })
+  
+  #Download pdf report
+  
+  output$download <- downloadHandler(
+    filename=function(){'Ship_Report.pdf'},
+    content=function(con) {
+      file.copy('WWW/Ship_Report.pdf', con)
+    },
+    contentType = 'application/pdf'
+  )
+  
+  
   
 })
