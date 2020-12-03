@@ -1,44 +1,26 @@
+library(shiny)
+library(shiny.semantic)
+library(semantic.dashboard)
+library(tidyverse)
+library(leaflet)
+library(geosphere)
+library(shinyjs)
+library(rmarkdown)
 
-# Define functions/objects exposed to both UI and Server
-#List of packages to load
-PkgList <- list('shiny', 'shiny.semantic', 'semantic.dashboard', 'shinyjs',
-                'tidyverse', 'leaflet', 'geosphere', 'rmarkdown')
-# 'feather', vroom, rmarkdown: called respective functions directly
-
-lapply(PkgList, function(x)do.call('require', list(x)))
-
-
-#Define module for drop downs
-
-ShipDropdown <- function(id, label = "shipselect", choiceselect='<None Available>') {
+ShipDropdownUI <- function(id) {
   ns <- NS(id)
-  
   tagList(
-    selectizeInput(ns("shipselect")
-                   , label =label
-                   , choices = choiceselect
-    )
-    
-  )
-}
-
-ShipDropdownServer <- function(id, choiceselect) {
-  moduleServer(
-    id,
-    function(input, output, session) {
-       updateSelectizeInput(session = getDefaultReactiveDomain()
-                           , inputId = "shipselect"
-                           # ,label = label
-                           , choices =c('<Select one>', choiceselect)
-                           ,selected = '<Select one>'
-      )
-      
-      # choicelist <-  reactive(input$shipselect)
-      choicelist <-  reactive(input$shipselect)
-      return(choicelist)
-      
-     }
+    uiOutput(ns('shipselect'))
   )
 }
 
 
+ShipDropdownServer <- function(id,label, choices) {
+  moduleServer(id, function(input, output, session) {
+    output$shipselect <- renderUI({
+      ns <- session$ns
+      selectInput(ns('shipselect'), label = label, choices = choices)
+    })
+    return(reactive(input$shipselect))
+  })
+}
