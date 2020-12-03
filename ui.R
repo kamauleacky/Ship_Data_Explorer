@@ -2,7 +2,7 @@
 shinyUI(semanticPage(
   
   # Application title
-  titlePanel("Old Faithful Geyser Data"),
+  titlePanel("Ship Data Explorer (Demo with data subset)"),
   
   # Sidebar with a slider input for number of bins
   sidebar_layout(
