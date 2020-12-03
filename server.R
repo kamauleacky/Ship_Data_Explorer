@@ -9,7 +9,9 @@ if(!file.exists('Data/ships.feather')){
   
   feather::write_feather(shipdata, 'Data/ships.feather')
 }else{
-  shipdata <- feather::read_feather('Data/ships.feather') #%>% head()
+  shipdata <- feather::read_feather('Data/ships.feather') %>%
+    group_by(ship_type, shiptype, shipname, flag, destination) %>%
+    top_n(10, lon) %>% data.frame()
 }
 
 shipsubsel <- shipdata %>% dplyr::distinct(shiptype,ship_type, shipname)
